@@ -9,6 +9,11 @@ using UnityEngine.UI;
 
 public class MenuManager : MonoBehaviour
 {
+
+    public delegate void GameStartCallBack();
+
+    private GameStartCallBack GameStartCall;
+
     public Image btnRedbg;
     public Image btnBluebg;
 
@@ -16,9 +21,19 @@ public class MenuManager : MonoBehaviour
     // Start is called before the first frame update
 
     private NetworkRunner _runner;
+
+    public GameObject objMainMenu;
+    public GameObject objOpponentFind;
+    public GameObject objOpponentMatch;
+
+    public Image imgMyColor;
+    public Image imgOppColor;
+
+    public Text txtTimer;
     void Start()
     {
-        if(Globle.currPlayerType == Globle.enumPlayerType.Red)
+        enableMainMenuScreen();
+        if (Globle.currPlayerType == Globle.enumPlayerType.Red)
         {
             selectRed();
         }
@@ -28,6 +43,16 @@ public class MenuManager : MonoBehaviour
         }
         
     }
+    private void OnEnable()
+    {
+        GameStartCall += OnGameStartCallback;
+    }
+
+    private void OnDisable()
+    {
+        GameStartCall -= OnGameStartCallback;
+    }
+
 
     private void selectRed()
     {
@@ -45,6 +70,38 @@ public class MenuManager : MonoBehaviour
         Globle.currPlayerType = Globle.enumPlayerType.Blue;
     }
 
+    public void enableMainMenuScreen()
+    {
+        objMainMenu.SetActive(true);
+        objOpponentFind.SetActive(false);
+        objOpponentMatch.SetActive(false);
+    }
+
+    public void enableOpponentFindScreen()
+    {
+        objMainMenu.SetActive(false);
+        objOpponentFind.SetActive(true);
+        objOpponentMatch.SetActive(false);
+    }
+
+    public void enableOpponentMatchScreen()
+    {
+        objMainMenu.SetActive(false);
+        objOpponentFind.SetActive(false);
+        objOpponentMatch.SetActive(true);
+
+        if(Globle.currPlayerType == Globle.enumPlayerType.Red)
+        {
+            imgMyColor.color = Color.red;
+            imgOppColor.color = Color.blue;
+        }
+        else
+        {
+            imgMyColor.color = Color.blue;
+            imgOppColor.color = Color.red;
+        }
+    }
+
     #region Button_click
     public void btn_RedClick()
     {
@@ -58,14 +115,18 @@ public class MenuManager : MonoBehaviour
 
     public void btn_continue()
     {
+        enableOpponentFindScreen();
         joinSession(GameMode.Shared);
     }
+    #endregion
+
+    #region Networking
 
     async void joinSession(GameMode mode)
     {
         // Create the Fusion runner and let it know that we will be providing user input
         _runner = new GameObject().AddComponent<NetworkRunner>();
-        _runner.gameObject.AddComponent<ConnectionManager>();
+        _runner.gameObject.AddComponent<ConnectionManager>().addStartGameCallback(GameStartCall);
         _runner.ProvideInput = true;
 
         var customProps = new Dictionary<string, SessionProperty>();
@@ -82,17 +143,18 @@ public class MenuManager : MonoBehaviour
                 break;
         }
         //customProps["T"] = (int)Globle.currPlayerType;
-        
+
 
         // Start or join (depends on gamemode) a session with a specific name
         await _runner.StartGame(new StartGameArgs()
         {
             GameMode = mode,
             SessionProperties = customProps,
-            DisableClientSessionCreation = true
+            DisableClientSessionCreation = true,
+            PlayerCount = 2
         });
 
-        if(_runner.IsShutdown)
+        if (_runner.IsShutdown)
         {
             createSession(GameMode.Shared);
         }
@@ -102,7 +164,7 @@ public class MenuManager : MonoBehaviour
     {
         // Create the Fusion runner and let it know that we will be providing user input
         _runner = new GameObject().AddComponent<NetworkRunner>();
-        _runner.gameObject.AddComponent<ConnectionManager>();
+        _runner.gameObject.AddComponent<ConnectionManager>().addStartGameCallback(GameStartCall);
         _runner.ProvideInput = true;
 
         var customProps = new Dictionary<string, SessionProperty>();
@@ -113,12 +175,33 @@ public class MenuManager : MonoBehaviour
         // Start or join (depends on gamemode) a session with a specific name
         await _runner.StartGame(new StartGameArgs()
         {
-            SessionName = UnityEngine.Random.Range(0,1000)+"",
+            SessionName = UnityEngine.Random.Range(0, 1000) + "",
             GameMode = mode,
             SessionProperties = customProps,
-        });;
+            PlayerCount = 2
+        }); ;
     }
+
     #endregion
 
-   
+    private void OnGameStartCallback()
+    {
+        StartCoroutine(coroutineGameStart());
+    }
+
+    IEnumerator coroutineGameStart()
+    {
+        enableOpponentMatchScreen();
+        int countDown = 3;
+        while(countDown >=0)
+        {
+            txtTimer.text = $"{countDown}";
+            countDown--;
+            yield return new WaitForSeconds(1f);
+        }
+        
+
+        SceneChangeManager.Instance.LoadNextScreen(SceneChangeManager.EnumScene.play);
+    }
+
 }

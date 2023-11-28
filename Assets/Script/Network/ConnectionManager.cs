@@ -4,22 +4,17 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using static MenuManager;
 
 public class ConnectionManager : MonoBehaviour, INetworkRunnerCallbacks
 {
-    //public static ConnectionManager instance;
+    private GameStartCallBack GameStartCall;
 
-    //private void Start()
-    //{
-    //    if(instance != null)
-    //    {
-    //        Destroy(this);
-    //    }
-    //    else
-    //    {
-    //        instance = this;
-    //    }
-    //}
+    public void addStartGameCallback(GameStartCallBack gameStartCallBack)
+    {
+        GameStartCall = gameStartCallBack;
+    }
 
     public void OnConnectedToServer(NetworkRunner runner)
     {
@@ -71,7 +66,14 @@ public class ConnectionManager : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
-        Debug.Log("OnPlayerJoined.." + runner.SessionInfo.Name);
+        Debug.Log("OnPlayerJoined.." + runner.SessionInfo.Name + ".." + runner.SessionInfo.PlayerCount);
+
+        if(runner.SessionInfo.PlayerCount == 2)
+        {
+            //SceneChangeManager.Instance.LoadNextScreen(SceneChangeManager.EnumScene.play);
+            if (GameStartCall != null)
+                GameStartCall.Invoke();
+        }
         // throw new NotImplementedException();
     }
 

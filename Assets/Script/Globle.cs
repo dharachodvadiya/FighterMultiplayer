@@ -4,6 +4,7 @@ using UnityEngine;
 
 public static class Globle
 {
+
     public enum enumPlayerType
     {
         Red,
