@@ -7,9 +7,15 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using static MenuManager;
 
-public class ConnectionManager : MonoBehaviour, INetworkRunnerCallbacks
+public class ConnectionManager : SimulationBehaviour, INetworkRunnerCallbacks
 {
     private GameStartCallBack GameStartCall;
+
+    Vector3 redPos = new Vector3(-2, -1.7f, -5);
+    Vector3 bluePos = new Vector3(2, -1.7f, -5);
+
+    Quaternion redRotation = Quaternion.Euler(0, 90, 0);
+    Quaternion blueRotation = Quaternion.Euler(0, -90, 0);
 
     public void addStartGameCallback(GameStartCallBack gameStartCallBack)
     {
@@ -122,5 +128,20 @@ public class ConnectionManager : MonoBehaviour, INetworkRunnerCallbacks
     {
         Debug.Log("OnUserSimulationMessage");
         // throw new NotImplementedException();
+    }
+
+    public void SpawnNetworkObject(GameObject PlayerPrefab)
+    {
+        if(Globle.currPlayerType == Globle.enumPlayerType.Red)
+        {
+            NetworkObject obj = Runner.Spawn(PlayerPrefab, redPos, redRotation, Runner.LocalPlayer);
+            obj.GetComponent<Player>().setData((int)Globle.currPlayerType);
+        }
+        else
+        {
+            NetworkObject obj = Runner.Spawn(PlayerPrefab, bluePos, blueRotation, Runner.LocalPlayer);
+            obj.GetComponent<Player>().setData((int)Globle.currPlayerType);
+        }
+       
     }
 }
