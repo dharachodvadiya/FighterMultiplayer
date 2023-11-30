@@ -6,12 +6,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using static MenuManager;
+using static SceneChangeManager;
 
 public class ConnectionManager : SimulationBehaviour, INetworkRunnerCallbacks
 {
     private GameStartCallBack GameStartCall;
 
     private Player MyPlayer;
+
+    public void endSession()
+    {
+        Runner.Shutdown();
+    }
 
     public void addStartGameCallback(GameStartCallBack gameStartCallBack)
     {
@@ -83,6 +89,14 @@ public class ConnectionManager : SimulationBehaviour, INetworkRunnerCallbacks
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
         Debug.Log("OnPlayerLeft");
+
+        if(player != Runner.LocalPlayer)
+        {
+            if(GamePlayManager.Instance != null)
+            {
+                GamePlayManager.Instance.declareResult(true);
+            }
+        }
         //throw new NotImplementedException();
     }
 
@@ -115,10 +129,10 @@ public class ConnectionManager : SimulationBehaviour, INetworkRunnerCallbacks
         Debug.Log("OnShutdown" + shutdownReason.ToString());
         // throw new NotImplementedException();
 
-        //if (shutdownReason == ShutdownReason.GameNotFound)
-        //{
-        //    createSession(GameMode.Server);
-        //}
+        if (shutdownReason == ShutdownReason.Ok)
+        {
+           
+        }
     }
 
     public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message)

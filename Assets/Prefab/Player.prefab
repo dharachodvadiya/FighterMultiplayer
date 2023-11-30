@@ -855,6 +855,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _interpolationDataSource: 0
   _playerType: 0
+  _currState: 0
   myCurrState: 0
   subPlayers: []
   animator: {fileID: 4968447437880990866}

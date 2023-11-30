@@ -15,6 +15,9 @@ public class Player : NetworkBehaviour
 
     public enumPlayerState myCurrState;
 
+    [Networked(OnChanged = nameof(NetworkedHealthChanged))]
+    public float NetworkedHealth { get; set; } = 100;
+
 
     private int copyPlayer = 5;
     public SubPlayer[] subPlayers;
@@ -25,6 +28,10 @@ public class Player : NetworkBehaviour
 
     public override void Spawned()
     {
+        if(!HasInputAuthority)
+        {
+            GamePlayManager.Instance.oppoPlayer = this;
+        }
         myCurrState = enumPlayerState.Idle;
         currState = (int)enumPlayerState.Idle;
 
@@ -75,19 +82,24 @@ public class Player : NetworkBehaviour
     {
         Debug.Log("network state change.." + ((enumPlayerState)changed.Behaviour.currState).ToString());
         changed.Behaviour.triggerAnimation((enumPlayerState)changed.Behaviour.currState);
+
+        if(changed.Behaviour.currState != (int)enumPlayerState.Idle)
+        {
+            GamePlayManager.Instance.countHealth();
+        }
     }
     public void setPlayerState(enumPlayerState playerState)
     {
         Debug.Log("state change.." + playerState.ToString());
-        myCurrState = playerState;
-        currState = (int)myCurrState;
-
+        
+        currState = (int)playerState;
 
     }
 
     public void triggerAnimation(enumPlayerState playerState)
     {
-        if(playerState != enumPlayerState.Idle)
+        myCurrState = playerState;
+        if (playerState != enumPlayerState.Idle)
         {
             animator.SetTrigger(playerState.ToString());
             for (int i = 0; i < copyPlayer; i++)
@@ -97,6 +109,13 @@ public class Player : NetworkBehaviour
         }
        
         
+    }
+
+    private static void NetworkedHealthChanged(Changed<Player> changed)
+    {
+        // Here you would add code to update the player's healthbar.
+        Debug.Log($"Health changed to: {changed.Behaviour.NetworkedHealth}");
+        GamePlayManager.Instance.setHealthData();
     }
 
     public void endAnim()
