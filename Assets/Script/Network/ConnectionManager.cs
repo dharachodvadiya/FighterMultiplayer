@@ -11,11 +11,7 @@ public class ConnectionManager : SimulationBehaviour, INetworkRunnerCallbacks
 {
     private GameStartCallBack GameStartCall;
 
-    Vector3 redPos = new Vector3(-2, -1.7f, -5);
-    Vector3 bluePos = new Vector3(2, -1.7f, -5);
-
-    Quaternion redRotation = Quaternion.Euler(0, 90, 0);
-    Quaternion blueRotation = Quaternion.Euler(0, -90, 0);
+    private Player MyPlayer;
 
     public void addStartGameCallback(GameStartCallBack gameStartCallBack)
     {
@@ -62,6 +58,7 @@ public class ConnectionManager : SimulationBehaviour, INetworkRunnerCallbacks
     {
         // Debug.Log("OnInput");
         //throw new NotImplementedException();
+
     }
 
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input)
@@ -130,18 +127,11 @@ public class ConnectionManager : SimulationBehaviour, INetworkRunnerCallbacks
         // throw new NotImplementedException();
     }
 
-    public void SpawnNetworkObject(GameObject PlayerPrefab)
+    public Player SpawnNetworkObject(GameObject PlayerPrefab,Vector3 pos, Quaternion rotation)
     {
-        if(Globle.currPlayerType == Globle.enumPlayerType.Red)
-        {
-            NetworkObject obj = Runner.Spawn(PlayerPrefab, redPos, redRotation, Runner.LocalPlayer);
-            obj.GetComponent<Player>().setData((int)Globle.currPlayerType);
-        }
-        else
-        {
-            NetworkObject obj = Runner.Spawn(PlayerPrefab, bluePos, blueRotation, Runner.LocalPlayer);
-            obj.GetComponent<Player>().setData((int)Globle.currPlayerType);
-        }
-       
+        MyPlayer = Runner.Spawn(PlayerPrefab, pos, rotation, Runner.LocalPlayer).GetComponent<Player>();
+        MyPlayer.setData((int)Globle.currPlayerType);
+        return MyPlayer;
+
     }
 }

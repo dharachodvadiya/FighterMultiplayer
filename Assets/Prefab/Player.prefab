@@ -854,8 +854,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _interpolationDataSource: 0
-  playerType: 0
+  _playerType: 0
+  myCurrState: 0
   subPlayers: []
+  animator: {fileID: 4968447437880990866}
+  renderTorso: {fileID: 4968447437885235802}
 --- !u!114 &8599042806277784986
 MonoBehaviour:
   m_ObjectHideFlags: 0

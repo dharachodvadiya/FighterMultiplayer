@@ -134,12 +134,12 @@ public class MenuManager : MonoBehaviour
         switch (Globle.currPlayerType)
         {
             case Globle.enumPlayerType.Red:
-                Debug.Log("join " + 1);
-                customProps["T"] = 1;
+                Debug.Log("join " + (int)Globle.enumPlayerType.Blue);
+                customProps["T"] = (int)Globle.enumPlayerType.Blue;
                 break;
             case Globle.enumPlayerType.Blue:
-                Debug.Log("join " + 0);
-                customProps["T"] = 0;
+                Debug.Log("join " + (int)Globle.enumPlayerType.Red);
+                customProps["T"] = (int)Globle.enumPlayerType.Red;
                 break;
         }
         //customProps["T"] = (int)Globle.currPlayerType;
